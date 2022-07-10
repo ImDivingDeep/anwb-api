@@ -15,7 +15,7 @@ class TrafficModel extends Database
 
     public function importTrafficFromApi()
     {
-        $certificate = "C:\wamp64\cacert.pem";
+        $certificate = "C:\Users\Emma\Documents\anwb-api\cacert.pem";
 
         # Get the json data from the api
         $url = 'https://api.anwb.nl/v2/incidents/desktop?apikey=QYUEE3fEcFD7SGMJ6E7QBCMzdQGqRkAi';
@@ -29,6 +29,11 @@ class TrafficModel extends Database
         curl_setopt($curl, CURLOPT_CAPATH, $certificate);
 
         $data = curl_exec($curl);
+
+        if ($data == false)
+        {
+            echo 'Curl error: ' . curl_error($curl);
+        }
 
         $jsondata = json_decode($data, true);
 
@@ -55,7 +60,6 @@ class TrafficModel extends Database
                 {
                     foreach ($segment["roadworks"] as $roadworks)
                     {
-                        var_dump($roadworks["toLoc"]["lat"]);
                         $this->executeQuery("INSERT INTO Traffic(Road, From_Location, To_Location, From_Loc_Lat, From_Loc_Lng, To_Loc_Lat, To_Loc_Lng, Distance, Delay, Reason, Valid_From, TrafficType, Polyline)
                         VALUES (:road, :from, :to, :from_loc_lat, :from_loc_lng, :to_loc_lat, :to_loc_lng, :distance, :delay, :reason, NOW(), 'Roadwork', :polyline)", 
                         [":road"=>$roadworks["road"],":from"=>$roadworks["from"], ":to"=>$roadworks["to"], ":from_loc_lat"=>$roadworks["fromLoc"]["lat"], 

@@ -14,8 +14,10 @@ For PHP, make sure to enable the pdo_mysql extension.
 If you do not want to use WAMPServer, follow the following steps.
 
 # Installing Apache
-Apache can also be installed without WAMPServer from here:
+Apache can also be installed from here:
 https://www.apachelounge.com/download/
+
+Install it to C:\apache64
 
 Apache httpd-vhost.conf:
 ```
@@ -31,13 +33,37 @@ Apache httpd-vhost.conf:
 
 Modify the DocumentRoot and Directory to where this directory is located
 
+Modify httpd.conf
+- Uncomment `Include conf/extra/httpd-vhosts.conf`
+- Add `Listen 8001`
+- Uncomment `LoadModule rewrite_module modules/mod_rewrite.so`
+
 # Installing PHP
 Download the latest PHP version here:
 https://windows.php.net/download
 
+Install to C:\php
+
+Add the following lines to Apaches httpd.conf
+```
+LoadModule php_module "C:\php\php8apache2_4.dll"
+AddHandler application/x-httpd-php  .php
+PHPIniDir "C:\php"
+```
+
+In C:\php copy the `php.ini-development` file and rename it to php.ini.
+Uncomment the `extension=curl` and `extension=pdo_mysql` lines
+
 # Installing MySQL
 Download MySQL from here:
 https://dev.mysql.com/downloads/installer/
+
+During the installation choose either Developer Default or Server only
+
+When setting a root password, make sure to change line 17 in `database.php`
+`$this->pdo = new PDO($dsn, "root", "password", $options);`
+
+Change line 18 of TrafficModel.php to point to the correct directory
 
 # Installing PhpMyAdmin (optional)
 If you want to interact with the MySQL database, install PhpMyAdmin from:
@@ -49,6 +75,7 @@ Add a scheduled task for LoadTrafficData.php for every 5 minutes.
 
 Using Windows Task Scheduler:
 - Create a new task
+	- Select `Run with highest privileges`
 - Add a new trigger
     - Select Daily with the Start Time being 00:00:00
     - Select Advanced Settings, Repeat task every 5 minutes
